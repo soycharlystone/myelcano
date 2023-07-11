@@ -6,8 +6,6 @@ import asyncio
 # git config --local credential.helper ""
 
 
-
-
 def main():
     asyncio.run(export_messages())
     
@@ -22,7 +20,7 @@ async def export_messages(export_file = "base.txt"):
             channel_dict = update_channel_dict(cleansed_content, channel_dict)
         except Exception as e:
             print("exportMessages : ERROR :", e)
-            sys.exit(0)
+            sys.exit(1)
             
         export_channels(channel_dict, export_file)
     
@@ -91,20 +89,34 @@ def export_channels(channel_dict, export_file):
                         "channel_id": channel_id,
                         "channel_name": channel_name + "  " + identif}
         channel_list.append(channel_info)
-        
+
+    # CANALES AÑADIDOS FUERA DE elcano
+    channel_list.append({'group_title': 'DAZN F1', 'tvg_id': '','logo': 'https://d1yjjnpx0p53s8.cloudfront.net/styles/logo-thumbnail/s3/012018/untitled-1_20.png?An9Fa1zRO4z6Dj__EVR4da6YOWsvtEw2&itok=6PiLMTa5', 'channel_id': 'https://www.f1-tempo.com/', 'channel_name': 'F1 Tempo Telemetría'})
+    #channel_list.append({'group_title': 'DAZN F1', 'tvg_id': 'DAZN F1 HD', 'logo': 'https://d1yjjnpx0p53s8.cloudfront.net/styles/logo-thumbnail/s3/012018/untitled-1_20.png?An9Fa1zRO4z6Dj__EVR4da6YOWsvtEw2&itok=6PiLMTa5', 'channel_id': 'dd7c34f04c96253ac10922e7759c8ebbb484a100', 'channel_name': 'F1 Multicámara by Álex'})
+    channel_list.append({'group_title': 'electroperra', 'tvg_id': 'HISTORIA', 'logo': 'https://www.movistarplus.es/recorte/m-NEO/canal/HIST.png', 'channel_id': 'http://mol-2.com:8080/play/live.php?mac=00:1A:79:C3:AF:36&stream=55609&extension=ts&play_token=ltn2GgE1z6', 'channel_name': 'Historia'})
+    channel_list.append({'group_title': 'electroperra', 'tvg_id': 'NAT GEO WILD HD', 'logo': 'https://www.movistarplus.es/recorte/m-NEO/canal/NATGW.png', 'channel_id': 'http://mol-2.com:8080/play/live.php?mac=00:1A:79:C3:AF:36&stream=55611&extension=ts&play_token=ltn2GgE1z6', 'channel_name': 'Nat Geo Wild'})
+    channel_list.append({'group_title': 'electroperra', 'tvg_id': 'NAT GEO HD', 'logo': 'https://www.movistarplus.es/recorte/m-NEO/canal/NATGEO.png', 'channel_id': 'http://mol-2.com:8080/play/live.php?mac=00:1A:79:C3:AF:36&stream=55613&extension=ts&play_token=ltn2GgE1z6', 'channel_name': 'National Geographic'})
+
     all_channels = ""
     all_channels += '#EXTM3U url-tvg="https://raw.githubusercontent.com/davidmuma/EPG_dobleM/master/guia.xml, https://raw.githubusercontent.com/acidjesuz/EPG/master/guide.xml"\n'
+    #all_channels += '#EXTINF:-1 tvg-logo="https://logodownload.org/wp-content/uploads/2017/11/telegram-logo-0-2.png" ,HACKS LOVE + ROBOTS\nhttps://t.me/+__T5lqenMkcwMzdk\n'
+    
     channel_pattern = '#EXTINF:-1 group-title="GROUPTITLE" tvg-id="TVGID" tvg-logo="LOGO" ,CHANNELTITLE\nacestream://CHANNELID\n'
-    #channel_pattern = '#EXTINF:-1 group-title="GROUPTITLE" tvg-id="TVGID" tvg-logo="LOGO" ,CHANNELTITLE\nhttp://127.0.0.1:6878/ace/getstream?id=CHANNELID\n'
+    channel_pattern_http = '#EXTINF:-1 group-title="GROUPTITLE" tvg-id="TVGID" tvg-logo="LOGO" ,CHANNELTITLE\nCHANNELID\n'
 
     for group_title in u.group_title_order:
         for channel_info in channel_list:
             if channel_info["group_title"] == group_title:
-                all_channels += channel_pattern.replace("GROUPTITLE", channel_info["group_title"]) \
+                if "http" in channel_info["channel_id"]:
+                    ch_pattern = channel_pattern_http
+                else:
+                    ch_pattern = channel_pattern
+                channel = ch_pattern.replace("GROUPTITLE", channel_info["group_title"]) \
                                                .replace("TVGID", channel_info["tvg_id"]) \
                                                .replace("LOGO", channel_info["logo"]) \
                                                .replace("CHANNELID", channel_info["channel_id"]) \
                                                .replace("CHANNELTITLE", channel_info["channel_name"])
+                all_channels += channel
 
     if all_channels != "":
         
